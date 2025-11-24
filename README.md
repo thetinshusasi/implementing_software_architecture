@@ -1,4 +1,5 @@
 # implementing_software_architecture
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
@@ -31,6 +32,86 @@
 ```bash
 $ pnpm install
 ```
+
+## Docker Setup
+
+This project includes Docker Compose configuration for PostgreSQL and pgAdmin.
+
+### Starting Docker Services
+
+```bash
+# Start PostgreSQL and pgAdmin
+$ docker-compose up -d
+
+# Stop services
+$ docker-compose down
+
+# View logs
+$ docker-compose logs -f
+```
+
+### Database Connection Details
+
+**From your NestJS application (running on host):**
+
+- **Host:** `localhost`
+- **Port:** `5432`
+- **Database:** `nestjs_db`
+- **Username:** `postgres`
+- **Password:** `postgres`
+
+**Connection String (PostgreSQL URI format):**
+
+```
+postgresql://postgres:postgres@localhost:5432/nestjs_db
+```
+
+**For NestJS TypeORM/Prisma configuration:**
+
+```typescript
+// TypeORM example
+{
+  type: 'postgres',
+  host: 'localhost',
+  port: 5432,
+  username: 'postgres',
+  password: 'postgres',
+  database: 'nestjs_db',
+}
+```
+
+**From another Docker container (same network):**
+
+- **Host:** `postgres` (service name)
+- **Port:** `5432`
+- **Database:** `nestjs_db`
+- **Username:** `postgres`
+- **Password:** `postgres`
+
+**Connection String (from Docker container):**
+
+```
+postgresql://postgres:postgres@postgres:5432/nestjs_db
+```
+
+### pgAdmin Access
+
+**Access pgAdmin:**
+
+- **URL:** `http://localhost:5050`
+- **Email:** `admin@admin.com`
+- **Password:** `admin`
+
+**To add PostgreSQL server in pgAdmin:**
+
+- **Name:** (any name you prefer, e.g., "Local PostgreSQL")
+- **Host:** `postgres` (use the service name when connecting from pgAdmin container)
+- **Port:** `5432`
+- **Maintenance database:** `postgres`
+- **Username:** `postgres`
+- **Password:** `postgres`
+
+> **Note:** When connecting from pgAdmin (which runs in Docker), use `postgres` as the hostname, not `localhost`, since both containers are on the same Docker network.
 
 ## Compile and run the project
 
@@ -70,4 +151,3 @@ $ mau deploy
 ```
 
 With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
