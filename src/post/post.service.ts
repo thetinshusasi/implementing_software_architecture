@@ -1,29 +1,45 @@
-import { Injectable } from '@nestjs/common';
-import { HttpApiService } from '../shared/http-api/http-api.service';
-import { Post } from '../models/post/post.interface';
-import { Observable } from 'rxjs';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { PostEntity } from '../models/post/post.entity';
+import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
 
 @Injectable()
 export class PostService {
-  constructor(private readonly httpApiService: HttpApiService) { }
+  constructor(
+    @InjectRepository(PostEntity)
+    private readonly postRepository: Repository<PostEntity>,
+  ) {}
 
-  findAll(): Observable<Post[]> {
-    return this.httpApiService.get<Post[]>('/posts');
+  async findAll(): Promise<PostEntity[]> {
+    return this.postRepository.find();
   }
 
-  findOne(id: string): Observable<Post> {
-    return this.httpApiService.get<Post>(`/posts/${id}`);
+  async findOne(id: string): Promise<PostEntity> {
+    const post = await this.postRepository.findOne({ where: { id } });
+    if (!post) {
+      throw new NotFoundException(`Post with ID ${id} not found`);
+    }
+    return post;
   }
 
-  create(post: Omit<Post, 'id'>): Observable<Post> {
-    return this.httpApiService.post<Post>('/posts', post);
+  async create(createPostDto: CreatePostDto): Promise<PostEntity> {
+    const post = this.postRepository.create({
+      title: createPostDto.title,
+      views: createPostDto.views ?? 0,
+    });
+    return this.postRepository.save(post);
   }
 
-  update(id: string, post: Partial<Post>): Observable<Post> {
-    return this.httpApiService.patch<Post>(`/posts/${id}`, post);
+  async update(id: string, updatePostDto: UpdatePostDto): Promise<PostEntity> {
+    const post = await this.findOne(id);
+    Object.assign(post, updatePostDto);
+    return this.postRepository.save(post);
   }
 
-  delete(id: string): Observable<void> {
-    return this.httpApiService.delete<void>(`/posts/${id}`);
+  async delete(id: string): Promise<void> {
+    const post = await this.findOne(id);
+    await this.postRepository.remove(post);
   }
 }

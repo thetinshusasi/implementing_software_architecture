@@ -1,0 +1,382 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Posts API",
+    "description": "API for managing posts with TypeORM and PostgreSQL",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local development server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "posts",
+      "description": "Post management endpoints"
+    }
+  ],
+  "paths": {
+    "/posts": {
+      "get": {
+        "tags": ["posts"],
+        "summary": "Get all posts",
+        "description": "Retrieve a list of all posts",
+        "operationId": "findAll",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Post"
+                  }
+                },
+                "example": [
+                  {
+                    "id": "550e8400-e29b-41d4-a716-446655440000",
+                    "title": "My First Post",
+                    "views": 100
+                  },
+                  {
+                    "id": "660e8400-e29b-41d4-a716-446655440001",
+                    "title": "My Second Post",
+                    "views": 50
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["posts"],
+        "summary": "Create a new post",
+        "description": "Create a new post with the provided data",
+        "operationId": "create",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePostDto"
+              },
+              "example": {
+                "title": "My New Post",
+                "views": 0
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Post created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                },
+                "example": {
+                  "id": "550e8400-e29b-41d4-a716-446655440000",
+                  "title": "My New Post",
+                  "views": 0
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "statusCode": 400,
+                  "message": [
+                    "title must be a string",
+                    "title should not be empty"
+                  ],
+                  "error": "Bad Request"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posts/{id}": {
+      "get": {
+        "tags": ["posts"],
+        "summary": "Get a post by ID",
+        "description": "Retrieve a specific post by its unique identifier",
+        "operationId": "findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier of the post (UUID)",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                },
+                "example": {
+                  "id": "550e8400-e29b-41d4-a716-446655440000",
+                  "title": "My First Post",
+                  "views": 100
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Post not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "statusCode": 404,
+                  "message": "Post with ID 550e8400-e29b-41d4-a716-446655440000 not found",
+                  "error": "Not Found"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["posts"],
+        "summary": "Update a post",
+        "description": "Update an existing post with partial data",
+        "operationId": "update",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier of the post (UUID)",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePostDto"
+              },
+              "example": {
+                "title": "Updated Post Title",
+                "views": 150
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Post updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                },
+                "example": {
+                  "id": "550e8400-e29b-41d4-a716-446655440000",
+                  "title": "Updated Post Title",
+                  "views": 150
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "statusCode": 400,
+                  "message": [
+                    "title must be a string",
+                    "views must be a number"
+                  ],
+                  "error": "Bad Request"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Post not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "statusCode": 404,
+                  "message": "Post with ID 550e8400-e29b-41d4-a716-446655440000 not found",
+                  "error": "Not Found"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["posts"],
+        "summary": "Delete a post",
+        "description": "Delete a post by its unique identifier",
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier of the post (UUID)",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post deleted successfully"
+          },
+          "404": {
+            "description": "Post not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "statusCode": 404,
+                  "message": "Post with ID 550e8400-e29b-41d4-a716-446655440000 not found",
+                  "error": "Not Found"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Post": {
+        "type": "object",
+        "required": ["id", "title", "views"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier of the post",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Title of the post",
+            "example": "My First Post"
+          },
+          "views": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0,
+            "description": "Number of views for the post",
+            "example": 100
+          }
+        }
+      },
+      "CreatePostDto": {
+        "type": "object",
+        "required": ["title"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Title of the post",
+            "example": "My New Post"
+          },
+          "views": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0,
+            "description": "Number of views for the post (optional, defaults to 0)",
+            "example": 0
+          }
+        }
+      },
+      "UpdatePostDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Title of the post",
+            "example": "Updated Post Title"
+          },
+          "views": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of views for the post",
+            "example": 150
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code",
+            "example": 400
+          },
+          "message": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "description": "Error message or array of validation errors",
+            "example": "Bad request"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error type",
+            "example": "Bad Request"
+          }
+        }
+      }
+    }
+  }
+}
